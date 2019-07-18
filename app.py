@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from BookModel import *
 from UserModel import *
-from SystemSettingsModel import *
 from settings import *
 import json
 from settings import *
@@ -31,45 +30,12 @@ def get_token():
 		return token
 
 
-@app.route('/settings')
-def get_settings():
-	return jsonify(SystemSettings.get_all_settings())
-
-
 def validStatusObject(statusObject):
 	if ("status" in statusObject):
 		return True
 	else:
 		return False
 
-
-
-@app.route('/settings/add', methods=['POST'])
-def add_system_settings():
-	token = request.args.get('token')
-	try:
-		jwt.decode(token, app.config['SECRET_KEY'])
-	except:
-		invalidToeknErrorMsg = {
-		"error" : "Need a valid token."
-		}
-		response = Response(json.dumps(invalidToeknErrorMsg), status=401, mimetype='application/json')
-		return response
-
-	request_data = request.get_json(())
-
-	if (validStatusObject(request_data)):
-		SystemSettings.add_system_settings(request_data['status'])
-		response = Response("", 201, mimetype='application/json')
-		response.headers['Location'] = "/settings" + str(request_data['status'])
-		return response
-	else:
-		invalidBookObjectErrorMsg = {
-		"error" : "Inavlid status passed in request",
-		"helpString" : "Data passed in similar to this {'status' : True}"
-		}
-		response = Response(json.dumps(invalidBookObjectErrorMsg), status=400, mimetype='application/json')
-		return response
 
 @app.route('/books')
 def get_books():
